@@ -1,0 +1,118 @@
+\documentclass[11pt]{article}
+\renewcommand{\baselinestretch}{1.15}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{threeparttable}
+\usepackage{mathtools}
+\usepackage{amsmath,amsthm,enumerate,graphicx,bm,type1cm,amssymb,epsfig,lscape,setspace,amssymb,url,color,tabu,xcolor,colortbl,rotating,tikz,pdfpages}
+\title{Empirical Industrial Organization \\ HW 4: Dynamic optimization}
+\author{Robert Ackerman \\ Anonymous}
+%\date{March 3, 2014}
+
+\begin{document}
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\maketitle
+
+\section*{Part I: Submission Contents}
+
+\indent
+
+This document contains each part of the required analysis and the appropriate commentary.  Additionally, the following files are contained within this folder:  
+
+\begin{enumerate}
+\item  \footnotesize{IO\_HW4\_AU.m}\normalsize : \ This is the main MATLAB script file.  Running this code will call on the other MATLAB function files to produce the required analysis.  Note: depending on the desired model, there are lines that must be commented and uncommented to run either the $\beta=0$ or $\beta=0.95$ specification.  It is currently set up to run the $\beta=0.95$ model estimation. 
+
+\item  \footnotesize{Likelihood.m}\normalsize : \ This file estimates the log likelihood for the chosen model.  The final line negates the likelihood to allow for the use of a minimization procedure rather than maximization.  The main code uses  \footnotesize{fminunc.m}\normalsize \ from the MATLAB optimization toolbox to minimize the negated log likelihood for the two models. 
+\end{enumerate}
+
+Note: The following analysis used the second version of the data.
+
+\section*{Part II: Summary Statistics}
+
+\indent
+
+Tables 1 presents summary statistics.
+
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline\hline
+\multicolumn{4}{c}{\textbf{Table 1: Summary Statistics}}\\
+\hline
+& \underline{Mean $s$} & \underline{Mean $a$}  & \underline{No. Obs.} \\
+all a & 2.1429 & - & 2400 \\
+a = 1 & 2.7668 & - & 892 \\
+a = 0 & 1.7739 & - & 1508 \\
+all s &  & 0.3717 & 2400 \\
+s = 1 & & 0.1701 & 876 \\
+s = 2 & & 0.3232 & 721 \\
+s = 3 & & 0.5551 & 481 \\
+s = 4 & & 0.7149 & 228 \\
+s = 5 & & 0.8511 & 94 \\
+\hline\hline
+\end {tabular}
+\end{center}
+
+The average bus age for the entire sample is 2.1429.  When an engine was replaced the average age of the bus was 2.7668, and 1.7739 when it was not.  There were 892 observations of engine replacement, and 1508 observations of maintenance which yields 37.17 percent of all buses in the sample undergoing engine replacement.  Table 1 also reports the percentage of buses of each age that underwent replacement.  These shares ranged from 17.01 percent for $s = 1$ to 85.11 percent for $s = 5$.  
+    
+\section*{Part III: $\beta=0$ estimation}
+\indent
+
+The model is first estimated assuming a $\beta=0$.  This assumes that only per period costs are considered, and the future impact of current decisions is ignored by the decision maker.  This essentially reduces the likelihood function to a simple MNL with the following log likelihood function:
+\begin{equation*}
+\mathcal{L}(\theta) = \sum_{i=1}^{100} \sum_{t=1}^{24} \left[\mathcal{I}(a_{it}=0)\text{log}\left(\frac{\text{exp}(-\theta_{0}s)}{\text{exp}(-\theta_{0}s) + \text{exp}(\theta_{1})}\right) + \mathcal{I}(a_{it}=1)\text{log}\left(\frac{\text{exp}(-\theta_{1})}{\text{exp}(-\theta_{0}s) + \text{exp}(\theta_{1})}\right)\right]
+\end{equation*}
+
+The estimates from this estimation were $\theta_{0}=0.8573$ and $\theta_{1}=2.4317$ with standard errors of $(0.0007)$ and $(0.0007)$ respectively.  Table 2 reports the estimated probabilities of replacement at each value of $s$ are reported and compared with the values from the summary statistics in Table 1.  
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline\hline
+\multicolumn{4}{c}{\textbf{Table 2: Estimated $P(a=1)$ by $s$}}, $\beta=0$\\
+\hline
+& \underline{Sample Mean $a$}  & \underline{MNL Probabilities} \\
+s = 1 & 0.1701 & 0.1716 \\
+s = 2 & 0.3232 &  0.3280 \\
+s = 3 & 0.5551 &  0.5350 \\
+s = 4 & 0.7149 &  0.7306 \\
+s = 5 & 0.8511 &  0.8647\\
+\hline\hline
+\end {tabular}
+\end{center}
+
+Clearly, the myopic model does a good pretty job of matching the data in terms of fitted probabilities.  However, if in the true data generating process the agent is forward looking, the estimate of the cost of engine replacement will be conflated with the (positive) future vale of having replaced the engine.  In particular this would lead us to get a downwardly biased estimate of the cost of engine replacement.
+
+
+\section*{Part IV: $\beta=0.95$ estimation}
+
+Next, the model is estimated assuming $\beta=0.95$, and using the NFXP algorithm.  This assumes that both per period costs and the future impact of current decisions are considered by the decision maker.  This changes the likelihood function accordingly:
+\begin{equation*}
+\begin{split}
+\mathcal{L}(\theta) & = \sum_{i=1}^{100} \sum_{t=1}^{24} \mathcal{I}(a_{it}=0)\text{log}\left(\frac{\text{exp}(-\theta_{0}s + \beta \mathbb{E}V(s^{'}|s, a=0))}{\text{exp}(-\theta_{0}s+ \beta \mathbb{E}V(s^{'}|s, a=0)) + \text{exp}(\theta_{1}+ \beta \mathbb{E}V(s^{'}|s, a=1))}\right) \\ 
+& + \mathcal{I}(a_{it}=1)\text{log}\left(\frac{\text{exp}(-\theta_{1}+ \beta \mathbb{E}V(s^{'}|s, a=1))}{\text{exp}(-\theta_{0}s+ \beta \mathbb{E}V(s^{'}|s, a=0)) + \text{exp}(\theta_{1}+ \beta \mathbb{E}V(s^{'}|s, a=1))}\right)
+\end{split}
+\end{equation*}
+
+
+The estimates from this estimation were $\theta_{0}=0.9397$ and $\theta_{1}=3.4274$ with standard errors of $(0.0036)$ and $(0.0007)$ respectively.  Table 3 reports the estimated probabilities of replacement at each value of $s$ are reported and compared with the values from the summary statistics in Table 1.  
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline\hline
+\multicolumn{4}{c}{\textbf{Table 3: Estimated $P(a=1)$ by $s$}}, $\beta=0.95$\\
+\hline
+& \underline{Sample Mean $a$}  & \underline{MNL Probabilities} \\
+s = 1 & 0.1701 & 0.1722 \\
+s = 2 & 0.3232 &  0.4524 \\
+s = 3 & 0.5551 &  0.7184 \\
+s = 4 & 0.7149 &  0.8756 \\
+s = 5 & 0.8511 &  0.9474\\
+\hline\hline
+\end {tabular}
+\end{center}
+
+The forward-looking model yields in-sample probability estimates that are further from the observed shares.  Nonetheless, they aren't that wrong.  If we want to use the models to predict the implications of future changes in the cost of engine replacement, the myopic model will be wrong because it conflates the actual cost with the future value of having replaced the engine.    The future-looking model will yield better predictions since we're explicitly modeling both the cost and the future value of replacement.  The higher estimate of $\theta_1$ in the forward-looking model is an encouraging result given that we expected the myopic model to yield a downwardly biased estimate of the cost of replacement.  
+
+
+
+\end{document}
